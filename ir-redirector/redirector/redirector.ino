@@ -1,7 +1,8 @@
 #include <IRremote.h>
 
 int RECV_PIN = 11;
-int LED_PIN = 13;
+int LED_ACTION = 13;
+int LED_PIN = 12;
 
 IRrecv irrecv(RECV_PIN);
 IRsend irsend;
@@ -10,12 +11,12 @@ decode_results results;
 
 bool redirect_flag; 
 
-// TODO: additional led for signal flag
 
 void setup()
 {
   Serial.begin(9600);
   pinMode(LED_PIN, OUTPUT);
+  pinMode(LED_ACTION, OUTPUT);
   irrecv.enableIRIn(); // Start the receiver
 }
 
@@ -39,6 +40,7 @@ void loop() {
           delay(200);
         }
         else if(redirect_flag){
+          digitalWrite(LED_ACTION, HIGH);
           switch ((&results)->value) {
 
               case 0x2F0:
@@ -99,7 +101,7 @@ void loop() {
                 // do something
                 break;
           }
-
+          digitalWrite(LED_ACTION, LOW);
         }
         
       }
@@ -119,14 +121,5 @@ void sendCommand(unsigned long data){
   irrecv.resume();
   delay(100);
 }
-
-
-
-
-
-
-
-
-
 
 
