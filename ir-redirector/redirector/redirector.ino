@@ -9,8 +9,10 @@ IRsend irsend;
 
 decode_results results;
 
-bool redirect_flag; 
-
+bool redirect_flag;
+unsigned long switch_off_start_timer;
+bool redirect_active_flag;
+// unsigned long switch_off_end_timer;
 
 void setup()
 {
@@ -20,23 +22,26 @@ void setup()
   irrecv.enableIRIn(); // Start the receiver
 }
 
+
+
 void loop() {
   if(irrecv.decode(&results)){
       if((&results)->decode_type == SONY){
         // magie remoter
         Serial.println("SONY");
 
+        redirect_active_flag=true;
+
         if((&results)->value == 0x5D0){
+
           Serial.println("SWITCH REDIRECTOR");
           // switch redirector
           redirect_flag=!redirect_flag;
 
-          if(redirect_flag){
-            digitalWrite(LED_PIN, HIGH);
+          if(redirect_flag&&redirect_active_flag){
+            switch_off_start_timer=millis();
           }
-          else{
-            digitalWrite(LED_PIN, LOW);
-          }
+
           delay(200);
         }
         else if(redirect_flag){
@@ -98,7 +103,7 @@ void loop() {
                 break;
 
               default:
-                // do something
+                redirect_active_flag=false;
                 break;
           }
           digitalWrite(LED_ACTION, LOW);
@@ -107,8 +112,23 @@ void loop() {
       }
       irrecv.resume();
 
+  }
+  else{
+    if(redirect_flag){
+      
+      digitalWrite(LED_PIN, HIGH);
 
-
+      // Serial.println(millis()-switch_off_start_timer);
+      // auto turn off after no signal input
+      if(millis()-switch_off_start_timer>10000){
+        Serial.println("timeout turn off");
+        digitalWrite(LED_PIN, LOW);
+        redirect_flag=false;
+      }
+    }
+    else{
+      digitalWrite(LED_PIN, LOW);
+    }
   }
 }
 
