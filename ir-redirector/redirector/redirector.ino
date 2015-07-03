@@ -38,14 +38,15 @@ void loop() {
           // switch redirector
           redirect_flag=!redirect_flag;
 
-          if(redirect_flag&&redirect_active_flag){
-            switch_off_start_timer=millis();
-          }
-
           delay(200);
         }
         else if(redirect_flag){
           digitalWrite(LED_ACTION, HIGH);
+          
+          if(redirect_flag&&redirect_active_flag){
+            switch_off_start_timer=millis();
+          }
+          
           switch ((&results)->value) {
 
               case 0x2F0:
@@ -120,7 +121,7 @@ void loop() {
 
       // Serial.println(millis()-switch_off_start_timer);
       // auto turn off after no signal input
-      if(millis()-switch_off_start_timer>10000){
+      if(millis()-switch_off_start_timer>600000){
         Serial.println("timeout turn off");
         digitalWrite(LED_PIN, LOW);
         redirect_flag=false;
